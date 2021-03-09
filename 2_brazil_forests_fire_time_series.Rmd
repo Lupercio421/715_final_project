@@ -1,0 +1,102 @@
+---
+title: "Brazil Amazon Fires"
+author: "Loopy421"
+date: "3/6/2021"
+output: html_document
+---
+
+```{r, message = FALSE, error=FALSE}
+library(readr)
+library(lubridate)
+library(tidyverse)
+library(forcats)
+amazon <- read_csv("/Users/daniel421/Desktop/R/STAT_715/Brazil_Forest_Fires/data/amazon_with_date.csv")
+View(amazon)
+
+#"/Users/daniel421/Desktop/R/STAT_715/Brazil_Forest_Fires/data/amazon_with_date.csv"
+```
+
+```{r}
+str(amazon)
+```
+Lets remove the month column
+
+```{r}
+amazon <- amazon[,-3]
+```
+
+
+### Creating a proper Month column
+
+```{r}
+amazon <- amazon %>% 
+  mutate(month = case_when(
+    month(date) %in% 1 ~ "January",
+    month(date) %in% 2 ~ "February",
+    month(date) %in% 3 ~ "March",
+    month(date) %in% 4 ~ "April",
+    month(date) %in% 5 ~ "May",
+    month(date) %in% 6 ~ "June",
+    month(date) %in% 7 ~ "July",
+    month(date) %in% 8 ~ "August",
+    month(date) %in% 9 ~ "September",
+    month(date) %in% 10 ~ "October",
+    month(date) %in% 11 ~ "November",
+    month(date) %in% 12 ~ "December"))
+```
+
+
+### Creating a seasons variable
+
+
+```{r}
+#https://seasonsyear.com/Brazil
+amazon <- amazon %>% 
+  mutate(month = case_when(
+    month(date) %in% 3:5 ~ "Fall",
+    month(date) %in% 6:8 ~ "Winter",
+    month(date) %in% 9:11 ~ "Spring",
+    TRUE ~ "Summer"))
+```
+
+```{r}
+
+```
+
+
+```{r}
+amazon %>% filter(date >= as.Date("2017-06-01"))
+```
+
+Re-leveling the month variable and season variable
+
+```{r}
+amazon <- amazon %>% mutate(month = fct_relevel(month, "January","February","March","April", "May", "June", "July", "August", "September", "October", "November", "December"))
+amazon <- amazon %>% mutate(season = fct_relevel(season, "Winter","Spring","Summer","Fall"))
+```
+
+
+```{r}
+ggplot(amazon, aes(x = factor(state), y = fires)) + geom_line()
+```
+
+```{r}
+ACRE_17 <- amazon %>% filter((state == "ACRE") & (date >= as.Date("2017-01-01")))
+```
+
+```{r}
+ggplot(ACRE_17, aes(x = month, y = fires)) + geom_line()
+```
+
+```{r}
+amazon_2017 <- amazon %>% filter(date >= as.Date("2017-01-01"))
+```
+
+```{r}
+ggplot(amazon_2017, aes(x = factor(month), y = fires), color = state) + geom_line()
+```
+
+```{r}
+amazon_2017 %>% filter(state == "PIAUÍ")
+```
+
