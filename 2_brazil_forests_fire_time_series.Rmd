@@ -59,9 +59,6 @@ amazon <- amazon %>%
     TRUE ~ "Summer"))
 ```
 
-```{r}
-
-```
 
 
 ```{r}
