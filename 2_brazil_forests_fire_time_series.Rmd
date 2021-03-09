@@ -60,7 +60,6 @@ amazon <- amazon %>%
 ```
 
 
-
 ```{r}
 amazon %>% filter(date >= as.Date("2017-06-01"))
 ```
