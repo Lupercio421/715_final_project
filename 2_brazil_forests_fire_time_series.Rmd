@@ -11,8 +11,7 @@ library(lubridate)
 library(tidyverse)
 library(forcats)
 amazon <- read_csv("/Users/daniel421/Desktop/R/STAT_715/Brazil_Forest_Fires/data/amazon_with_date.csv")
-View(amazon)
-
+#View(amazon)
 #"/Users/daniel421/Desktop/R/STAT_715/Brazil_Forest_Fires/data/amazon_with_date.csv"
 ```
 
@@ -52,7 +51,7 @@ amazon <- amazon %>%
 ```{r}
 #https://seasonsyear.com/Brazil
 amazon <- amazon %>% 
-  mutate(month = case_when(
+  mutate(season = case_when(
     month(date) %in% 3:5 ~ "Fall",
     month(date) %in% 6:8 ~ "Winter",
     month(date) %in% 9:11 ~ "Spring",
@@ -97,6 +96,7 @@ amazon_2017 %>% filter(state == "PIAUÍ")
 ```
 
 ```{r}
-#adding a change
+amazon %>% filter(date >= as.Date("2017-11-01"))
 ```
 
+$T_0$
