@@ -96,3 +96,7 @@ ggplot(amazon_2017, aes(x = factor(month), y = fires), color = state) + geom_lin
 amazon_2017 %>% filter(state == "PIAUÍ")
 ```
 
+```{r}
+#adding a change
+```
+
