@@ -5,3 +5,99 @@ date: "3/25/2021"
 output: html_document
 ---
 
+```{r, error = FALSE, message=FALSE}
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r}
+data_911 <- read.csv("/Users/daniel421/Desktop/R/STAT_715/911_End-to-End_Data.csv", header= TRUE)
+```
+
+
+```{r}
+#str(data_911);
+```
+We see that the data is a character, so I will work on making it a POSIX
+
+```{r}
+data_911[,1] <- mdy(data_911[,1])
+```
+
+
+Let us Isolate the 3 major Agencies right away
+
+#### EMS
+
+```{r}
+EMS_data <- data_911 %>% filter(Agency == "EMS")
+```
+
+```{r}
+EMS_data <- EMS_data[,-c(7,8,16,17,29,30)]
+```
+
+#### NYPD
+
+```{r}
+NYPD_data <- data_911 %>% filter(Agency == "NYPD")
+```
+
+```{r}
+NYPD_data <- NYPD_data[,-c(7,8,9,10,16,17,18,19,25,26,29,30)]
+```
+
+### FDNY
+
+```{r}
+FDNY_data <- data_911 %>% filter(Agency == "FDNY")
+```
+
+
+```{r}
+#filter(MONTH >= as.Date("2017-01-01") & MONTH <= as.Date("2017-12-01"))
+FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% filter(Week_Start_Date >= as.Date("2014-01-06") & Week_Start_Date <= as.Date("2014-12-29"))
+```
+
+```{r}
+FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% filter(Week_Start_Date >= as.Date("2015-01-05") & Week_Start_Date <= as.Date("2015-12-28"))
+```
+```{r}
+FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% filter(Week_Start_Date >= as.Date("2016-01-04") & Week_Start_Date <= as.Date("2016-12-26"))
+```
+```{r}
+FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% filter(Week_Start_Date >= as.Date("2017-01-02") & Week_Start_Date <= as.Date("2017-12-25"))
+```
+
+```{r}
+FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% filter(Week_Start_Date >= as.Date("2017-01-04") & Week_Start_Date <= as.Date("2019-12-30"))
+```
+
+```{r}
+FDNY_data %>% filter(Week_Start_Date >= as.Date("2015-01-05") & Week_Start_Date <= as.Date("2020-08-24"))
+```
+# NYPD
+
+```{r}
+NYPD_data %>% filter(Week_Start_Date >= as.Date("2014-01-06") & Week_Start_Date <= as.Date("2020-08-24"))
+```
+Best to exclude 2013 and 2014
+
+Let us check to see if Jan of 2015 through Dec of 2019 gives us 780 rows
+
+```{r}
+NYPD_data %>% filter(Week_Start_Date >= as.Date("2015-01-05") & Week_Start_Date <= as.Date("2020-08-24"))
+```
+
+# EMS
+
+```{r}
+EMS_data %>% filter(Week_Start_Date >= as.Date("2015-01-05") & Week_Start_Date <= as.Date("2020-08-24"))
+```
+
+```{r}
+EMS_data %>% filter(Week_Start_Date >= as.Date("2020-01-06") & Week_Start_Date <= as.Date("2020-08-24"))
+```
+
+It is up to me if the start and end dates should be "2015-01-05" through "2019-12-30" or whether it should be "2015-01-05" through "2020-08-24"
