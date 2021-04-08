@@ -5,3 +5,61 @@ date: "3/17/2021"
 output: html_document
 ---
 
+Let us load the data
+
+```{r}
+fed_cons <- read.csv("TLPBLCONS.csv", header = TRUE)
+```
+
+Let us load the forecasting package
+
+```{r}
+library(fpp2)
+```
+
+Declaring the time series data
+
+```{r}
+y <- ts(fed_cons[,4], start = c(1993,1), frequency = 12)
+```
+
+## Prelim analysis
+
+Time plot
+
+```{r}
+autoplot(y) +
+  ggtitle("Time Plot: Total Daily Public Construction Spending" )+
+  ylab("Millions of Dollars")
+```
+
+This data has a strong positive trend
+
+Take the first difference of the data to remove the trend. We will look at the total change in spending, from month to month. For example, we look at the change of Jan '93 to Feb '93, so on.
+
+```{r}
+Dy <- diff(y)
+autoplot(Dy) +
+  ggtitle("Time Plot: Change in Public Construction Spending per Day" )+
+  ylab("Millions of Dollars")
+```
+
+The trend is removed, fluctuations do exist. Now, assuming this new series is stationary, let us investigate seasonality.
+
+```{r}
+ggseasonplot(Dy) + ggtitle("Seasonal Plot: Change in Daily Construction Spending") + ylab("Millions of Dollars")
+```
+
+We see a negative daily spending from February to March, April to May, Jun to Jul, Sep to Oct and Nov to Dec.
+
+Let us look at another seasonal plot, the subseries plot
+
+```{r}
+ggsubseriesplot(Dy)
+```
+
+The average daily change in February is highly positive and the average daily change in March is very negative.
+
+## our series y has trend and seasonality. To remove the trend, we take the first difference. The first differenced steries still has sesonality. 
+
+
