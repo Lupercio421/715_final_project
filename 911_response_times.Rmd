@@ -132,8 +132,11 @@ EMS_data %>% filter(Week_Start_Date >= as.Date("2020-01-06") & Week_Start_Date <
 
 
 ```{r}
-data_911 <- data_911 %>% filter(Week_Start_Date >= as.Date("2015-01-05") & Week_Start_Date <= as.Date("2019-12-23"))
+data_911 <- data_911 %>% arrange(ymd(data_911$Week_Start_Date))
+
+data_911 <- data_911 %>% filter(Week_Start_Date >= as.Date("2015-01-05") & Week_Start_Date <= as.Date("2019-12-23")) 
 ```
+
 
 Let us Isolate the 3 major Agencies again
 
@@ -146,6 +149,7 @@ EMS_data <- data_911 %>% filter(Agency == "EMS")
 ```{r}
 EMS_data <- EMS_data[,-c(7,8,16,17,29,30)]
 ```
+
 
 #### NYPD
 
@@ -183,10 +187,10 @@ class(EMS_data)
 ## EMS Part 2
 
 ```{r}
-EMS_final_1 <- EMS_data %>% filter(Final_Incident_Type == "1. Life Threating Med Emergencies")
+EMS_final_1 <- EMS_data %>% filter(Final_Incident_Type == "1. Life Threating Med Emergencies") 
 ```
 
 ```{r}
-ts_EMS_final_1 <- ts(EMS_final_1[,c(1,10)], freq = 365.25/7, start = ymd(EMS_final_1[1,1]))
+ts_EMS_final_1 <- ts(EMS_final_1[,10], freq = 52, start = (ymd(EMS_final_1[1,1])))
 ```
 
