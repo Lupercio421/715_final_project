@@ -180,3 +180,13 @@ class(EMS_data)
 #ts(new_EMS_data[,c(3,10)], freq = 365.25/7, start = decimal_date(ymd("2015-01-05")))
 ```
 
+## EMS Part 2
+
+```{r}
+EMS_final_1 <- EMS_data %>% filter(Final_Incident_Type == "1. Life Threating Med Emergencies")
+```
+
+```{r}
+ts_EMS_final_1 <- ts(EMS_final_1[,c(1,10)], freq = 365.25/7, start = ymd(EMS_final_1[1,1]))
+```
+
