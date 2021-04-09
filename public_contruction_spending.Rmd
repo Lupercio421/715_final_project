@@ -52,14 +52,24 @@ ggseasonplot(Dy) + ggtitle("Seasonal Plot: Change in Daily Construction Spending
 
 We see a negative daily spending from February to March, April to May, Jun to Jul, Sep to Oct and Nov to Dec.
 
+```{r}
+ggseasonplot(Dy, polar = TRUE) + ggtitle("Seasonal Plot: Change in Daily Construction Spending") + ylab("Millions of Dollars")
+```
+
+
 Let us look at another seasonal plot, the subseries plot
 
 ```{r}
-ggsubseriesplot(Dy)
+ggsubseriesplot(Dy) + ggtitle("Seasonal subseries plot: Daily Construction Spending") + ylab("Millions of Dollars")
 ```
+The horizontal lines indicate the means for each month. This form of plot enables the underlying seasonal pattern to be seen clearly, and also shows the changes in seasonality over time.
 
 The average daily change in February is highly positive and the average daily change in March is very negative.
 
 ## our series y has trend and seasonality. To remove the trend, we take the first difference. The first differenced steries still has sesonality. 
 
+```{r}
+library(TSstudio)
+data("USgas")
+```
 
