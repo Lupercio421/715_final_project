@@ -69,7 +69,93 @@ The average daily change in February is highly positive and the average daily ch
 ## our series y has trend and seasonality. To remove the trend, we take the first difference. The first differenced steries still has sesonality. 
 
 ```{r}
-library(TSstudio)
-data("USgas")
+gglagplot(Dy, lags = 4, set.lags = 1:4) + ggtitle("Lag Plot")
+```
+
+There is a strong negative linear relationship for lag = 1. You can not determine a linear relationship for lags 2,3 and 4. 
+
+### Autorcorrelation Plot
+
+```{r}
+ggAcf(Dy)
+```
+
+We see a pattern of high correlation values on lags of multiple of 12. However, we will only be looking at the first two or three lags. 
+
+## Benchmark method to forecast
+
+### Let's use the seasonal naive method as our benchmark
+
+$y_t = y_{t-s}+e_t$
+
+We would like to use the difference data
+
+```{r}
+fit <- snaive(Dy)
+print(summary(fit))
+```
+
+The residual sd = 262.4751. This forecast, is missing, on average, 262 million dollars.
+
+```{r}
+checkresiduals(fit)
+```
+
+The blue dashed lines represent a 95% confidence interval. For lag = 1, we have auto-correlation left over on the residuals of this model, which is not ideal. This forecasting model is not taking in the data as best as we wish to. 
+
+### Fit ETS method
+
+Exponential smoothing model. Here we will use our original y time series
+
+```{r}
+fit_ets <- ets(y);
+print(summary(fit_ets))
+```
+
+Here, the residual standard deviation = 0.0235
+
+```{r}
+checkresiduals(fit_ets)
+```
+
+
+
+### Let us fit in an ARIMA model
+
+We will need the data to be stationary. Perhaps we use the differenced data by specifying a parameter and taking out the seasonality difference in the auto.arima function.
+
+```{r}
+fit_arima <- auto.arima(y, d = 1, D = 1, stepwise = FALSE, approximation = FALSE, trace = TRUE);
+print(summary(fit_arima))
+```
+
+sq
+```{r}
+sqrt(35988)
+```
+
+The residual standard deviation = 197.8
+
+```{r}
+checkresiduals(fit_arima)
+```
+
+### Let us forecast with this ARIMA model
+
+```{r}
+fcst <- forecast(fit_arima, h = 24)
+```
+
+
+```{r}
+autoplot(fcst)
+```
+
+```{r}
+autoplot(fcst, include = 60)
+```
+
+```{r}
+print(summary(fcst))
 ```
 
