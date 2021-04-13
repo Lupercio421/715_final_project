@@ -186,11 +186,117 @@ class(EMS_data)
 
 ## EMS Part 2
 
+## Life Threatening Emergencies
+
 ```{r}
 EMS_final_1 <- EMS_data %>% filter(Final_Incident_Type == "1. Life Threating Med Emergencies") 
+EMS_final_1[,10]
 ```
 
 ```{r}
-ts_EMS_final_1 <- ts(EMS_final_1[,10], freq = 52, start = (ymd(EMS_final_1[1,1])))
+#(ymd(EMS_final_1[1,1])
+ts_EMS_final_1 <- ts(EMS_final_1[,10], freq = 365.25/7, start = 2015+0/365.25)
+```
+
+
+```{r}
+plot(ts_EMS_final_1)
+```
+
+It seems that I have gotten my time series data starting with the first week of 2015 through the final week of 2019. I will begin the forecasting process using material from fpp2 package. 
+
+```{r}
+library(fpp2)
+```
+
+
+```{r}
+#Time plot
+autoplot(ts_EMS_final_1) +
+  ggtitle("Life Threatening Medical Emergencies: First Call to EMS arrival" )+
+  ylab("Seconds")
+```
+
+We see a decreasing trend in call to arrival time from 2015 through mid 2017, then we see an increasing trend all the way through the end of 2019. We can assume that at the start of every year, call to arrival time are high for the new years celebrations.
+
+
+## Non-Life Threatening Emergencies
+```{r}
+EMS_final_2 <- EMS_data %>% filter(Final_Incident_Type == "2. Non-Life Threatening Med Emergencies") 
+ts_EMS_final_2 <- ts(EMS_final_2[,10], freq = 365.25/7, start = 2015+0/365.25)
+```
+
+```{r}
+autoplot(ts_EMS_final_2) +
+  ggtitle("Non-Life Threatening Medical Emergencies: First Call to EMS arrival" )+
+  ylab("Seconds")
+```
+
+These calls begin at a longer wait time. Like the life threatening medical emergencies, we see a similar trend.
+
+## NYPD - 1. Critical Incidents
+
+```{r}
+NYPD_data_1 <- NYPD_data %>% filter(Final_Incident_Type == "1. Critical")
+ts_NYPD_data_1 <- ts(NYPD_data_1[,8], freq = 365.25/7, start = 2015+0/365.25)
+```
+
+```{r}
+autoplot(ts_NYPD_data_1) +
+  ggtitle("Critical Incidents: First Call to NYPD arrival" )+
+  ylab("Seconds")
+```
+
+## NYPD  2. Serious Incidents 
+
+```{r}
+NYPD_data_2 <- NYPD_data %>% filter(Final_Incident_Type == "2. Serious")
+ts_NYPD_data_2 <- ts(NYPD_data_2[,8], freq = 365.25/7, start = 2015+0/365.25)
+```
+
+
+```{r}
+autoplot(ts_NYPD_data_2) +
+  ggtitle("Serious Incidents: First Call to NYPD arrival" )+
+  ylab("Seconds")
+```
+
+## NYPD Non-Critical Incidents
+
+```{r}
+NYPD_data_3 <- NYPD_data %>% filter(Final_Incident_Type == "3. Non-Critical")
+
+ts_NYPD_data_3 <- ts(NYPD_data_3[,8], freq = 365.25/7, start = 2015+0/365.25)
+
+autoplot(ts_NYPD_data_3) +
+  ggtitle("Non-Critical Incidents: First Call to NYPD arrival" )+
+  ylab("Seconds")
+```
+
+# For FDNY, we will be looking at Structural Fire Incidents and Medical Emergencies
+
+## FDNY - 1. Structural Fires
+
+```{r}
+FDNY_data_1 <- FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires")
+
+ts_FDNY_data_1 <- ts(FDNY_data_1[,12], freq = 365.25/7, start = 2015+0/365.25)
+
+autoplot(ts_FDNY_data_1) +
+  ggtitle("Structural Fires: First Call to FDNY arrival" )+
+  ylab("Seconds")
+
+```
+
+## FDNY 3. Medical Emergencies
+
+```{r}
+FDNY_data_3 <- FDNY_data %>% filter(Final_Incident_Type == "3. Medical Emergencies")
+
+ts_FDNY_data_3 <- ts(FDNY_data_3[,12], freq = 365.25/7, start = 2015+0/365.25)
+
+autoplot(ts_FDNY_data_3) +
+  ggtitle("Medical Emergencies: First Call to FDNY arrival" )+
+  ylab("Seconds")
 ```
 
