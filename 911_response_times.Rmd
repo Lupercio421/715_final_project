@@ -206,11 +206,6 @@ plot(ts_EMS_final_1)
 It seems that I have gotten my time series data starting with the first week of 2015 through the final week of 2019. I will begin the forecasting process using material from fpp2 package. 
 
 ```{r}
-library(fpp2)
-```
-
-
-```{r}
 #Time plot
 autoplot(ts_EMS_final_1) +
   ggtitle("Life Threatening Medical Emergencies: First Call to EMS arrival" )+
@@ -218,6 +213,54 @@ autoplot(ts_EMS_final_1) +
 ```
 
 We see a decreasing trend in call to arrival time from 2015 through mid 2017, then we see an increasing trend all the way through the end of 2019. We can assume that at the start of every year, call to arrival time are high for the new years celebrations.
+
+### Let us difference this data once
+
+```{r}
+ts_EMS_final_1_diff <- diff(ts_EMS_final_1)
+autoplot(ts_EMS_final_1_diff) +
+  ggtitle("DifferencedLife Threatening Medical Emergencies: First Call to EMS arrival" )+
+  ylab("Seconds")
+```
+
+The trend is removed, fluctuations do exist. Now, assuming this new series is stationary, let us investigate seasonality.
+
+```{r}
+ggseasonplot(ts_EMS_final_1_diff) + ggtitle("Seasonal Plot: Change in First Call to EMS arrival") + ylab("Seconds")
+```
+
+```{r}
+#ggsubseriesplot(ts_EMS_final_1_diff) + ggtitle("Seasonal subseries plot: Change in First Call to EMS arrival") + ylab("Seconds")
+```
+
+```{r}
+gglagplot(ts_EMS_final_1_diff, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.lines = FALSE) + ggtitle("Lag Plot") + theme(legend.title = element_blank())
+```
+
+Here, we can not specify a positive or negative linear trend. 
+
+### Autorcorrelation Plot
+
+```{r}
+ggAcf(ts_EMS_final_1_diff) + ggtitle("Autocorrelation Plot: Differenced Life Threatening Emergencies Time Series")
+```
+
+Lags 1 and 2 go beyond the 95% confidence intervals.
+
+## Benchmark method to forecast
+
+### Let's use the seasonal naive method as our benchmark
+
+$y_t = y_{t-s}+e_t$
+
+We would like to use the difference data
+
+```{r}
+ts_EMS_final_1_diff_fit <- snaive(ts_EMS_final_1_diff);
+print(summary(ts_EMS_final_1_diff_fit))
+```
+
+Residual standard deviation = 28.5456
 
 
 ## Non-Life Threatening Emergencies
@@ -228,11 +271,19 @@ ts_EMS_final_2 <- ts(EMS_final_2[,10], freq = 365.25/7, start = 2015+0/365.25)
 
 ```{r}
 autoplot(ts_EMS_final_2) +
-  ggtitle("Non-Life Threatening Medical Emergencies: First Call to EMS arrival" )+
+  ggtitle("Non-Life Threatening Medical Emergencies: First Call to EMS arrival")+
   ylab("Seconds")
 ```
 
 These calls begin at a longer wait time. Like the life threatening medical emergencies, we see a similar trend.
+
+```{r}
+ts.plot(ts_EMS_final_1, ts_EMS_final_2,
+        gpars=list(xlab="Time", ylab="Seconds", col = c("red", "blue")))
+title("EMS Time Series")
+#legend()
+```
+ 
 
 ## NYPD - 1. Critical Incidents
 
@@ -273,7 +324,7 @@ autoplot(ts_NYPD_data_3) +
   ylab("Seconds")
 ```
 
-# For FDNY, we will be looking at Structural Fire Incidents and Medical Emergencies
+# For FDNY, we will be looking at Structural Fire  and Non-Structural Fire Incidents
 
 ## FDNY - 1. Structural Fires
 
@@ -288,15 +339,31 @@ autoplot(ts_FDNY_data_1) +
 
 ```
 
+## FDNY - 2. Structural Fires
+
+```{r}
+FDNY_data_2 <- FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires")
+
+ts_FDNY_data_2 <- ts(FDNY_data_2[,12], freq = 365.25/7, start = 2015+0/365.25)
+
+autoplot(ts_FDNY_data_2) +
+  ggtitle("Non-Structural Fires: First Call to FDNY arrival" )+
+  ylab("Seconds")
+
+
+```
+
+
 ## FDNY 3. Medical Emergencies
 
 ```{r}
-FDNY_data_3 <- FDNY_data %>% filter(Final_Incident_Type == "3. Medical Emergencies")
+#rm(FDNY_data_3, ts_)
+#FDNY_data_3 <- FDNY_data %>% filter(Final_Incident_Type == "3. Medical Emergencies")
 
-ts_FDNY_data_3 <- ts(FDNY_data_3[,12], freq = 365.25/7, start = 2015+0/365.25)
+#ts_FDNY_data_3 <- ts(FDNY_data_3[,12], freq = 365.25/7, start = 2015+0/365.25)
 
-autoplot(ts_FDNY_data_3) +
-  ggtitle("Medical Emergencies: First Call to FDNY arrival" )+
-  ylab("Seconds")
+#autoplot(ts_FDNY_data_3) +
+#  ggtitle("Medical Emergencies: First Call to FDNY arrival" )+
+#  ylab("Seconds")
 ```
 
