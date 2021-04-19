@@ -288,10 +288,14 @@ Out test statistic tells us that we fail to reject the null hypothesis, and conc
 
 ## Begin forecasting
 
-```{r}
+```{r, results = 'hide'}
 forecast(ts_EMS_final_1_fit_arima, h = 36)
+```
+
+```{r}
 autoplot(forecast(ts_EMS_final_1_fit_arima, h = 36))
 ```
+
 
 After 19 weeks, the predicted call to agency arrival stabilizes to 611.4576.
 
@@ -431,9 +435,12 @@ qchisq(.95, 48)
 
 ### Begin forecasting
 
+```{r, results='hide'}
+forecast(ts_EMS_final_1_diff, h = 52)
+```
+
 ```{r}
-forecast(ts_NYPD_data_1_fit_arima, h = 52)
-autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52))
+autoplot(forecast(ts_EMS_final_1_diff, h = 52))
 ```
 
 
