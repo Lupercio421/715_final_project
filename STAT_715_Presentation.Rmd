@@ -1,0 +1,118 @@
+---
+title: "STAT 715 Presentation"
+author: "Daniel L."
+date: "4/19/2021"
+output: html_document
+---
+
+rmarkdown::render("STAT_715_Presentation.Rmd")
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, error = FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+library(fable)
+library(TSA)
+#load forescasting package
+library(fpp2)
+library(ggThemeAssist)
+library(kableExtra)
+```
+
+# Emergency Medical Services (EMS)
+
+Begin by introducing its services and the data that comes with it
+
+EMS workers respond to two different calls, "Life Threatening Medical Emergencies" and "Non-life Threatening Medical Emergencies"
+
+-Create a table of counts
+
+-Compare the time series
+
+```{r}
+EMS_table_final %>% kbl(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
+```
+
+Let us compare the time series of the two types of incidents
+
+### Life-Threatening
+
+```{r}
+autoplot(ts_EMS_final_1) +
+  ggtitle("Life Threatening Medical Emergencies: First Call to EMS arrival") +
+  ylab("Seconds") + theme(panel.background = element_rect(fill = NA, 
+    linetype = "dotted"), plot.background = element_rect(fill = "white", 
+    colour = NA))
+```
+
+### Non-Life Threatening
+
+```{r}
+autoplot(ts_EMS_final_2) +
+  ggtitle("Non-Life Threatening Medical Emergencies: First Call to EMS arrival") +
+  ylab("Seconds") + theme(panel.background = element_rect(fill = NA, 
+    linetype = "dotted"), plot.background = element_rect(fill = "white", 
+    colour = NA))
+```
+
+Let us focus on Life Threatening Medical Emergencies.
+
+### Let us difference this data once
+
+The differenced time series uses the value of week 2 minus week 1 of 2015, week 3 minus week 2, so on. 
+
+```{r}
+ts_EMS_final_1_diff <- diff(ts_EMS_final_1)
+autoplot(ts_EMS_final_1_diff) +
+  ggtitle("Differenced Life Threatening Medical Emergencies: First Call to EMS arrival" )+
+  ylab("Seconds")
+```
+
+The trend is removed, fluctuations do exist. Now, assuming this new series is stationary, let us investigate seasonality.
+
+```{r, fig.width=10, fig.height=7, error = FALSE}
+ggseasonplot(ts_EMS_final_1_diff) + ggtitle("Seasonal Plot: Change in First Call to EMS arrival") + ylab("Seconds")+ theme_minimal()
+```
+
+
+```{r}
+gglagplot(ts_EMS_final_1_diff, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.lines = FALSE) + ggtitle("Lag Plot") + theme(legend.title = element_blank())
+```
+
+Here, we can not specify a positive or negative linear trend. 
+
+```{r,echo=FALSE}
+#ggAcf(ts_EMS_final_1_diff) + ggtitle("Autocorrelation Plot: Differenced Life Threatening Emergencies Time Series")
+```
+
+Lags 1 and 2 go beyond the 95% confidence intervals.
+
+### Let us model the differenced data with ARIMA
+
+```{r}
+print(summary(ts_EMS_final_1_fit_arima))
+```
+
+```{r}
+checkresiduals(ts_EMS_final_1_fit_arima)
+```
+
+The number of lags used is 52, so our degrees of freedom for the residuals is 52-3-1 = 48. The upper tail $\chi^2$ evaluated at $\alpha = .05$ with 48 degrees of freedom is 65.171. Our test statistic, Q* = 41.052 and is $\leq$ 65.171. 
+
+$H_0$: This ARIMA(3,1,1) model does not exhibit lack of fit vs $H_a$: This model exhibits lack of fit.
+
+Out test statistic tells us that we fail to reject the null hypothesis, and conclude $H_0$. This model does not exhibit has significant lack of fit.
+
+## Begin forecasting
+
+```{r, results = 'hide'}
+forecast(ts_EMS_final_1_fit_arima, h = 52)
+```
+
+```{r}
+autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52))
+```
+

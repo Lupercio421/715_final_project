@@ -5,6 +5,10 @@ date: "3/25/2021"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ```{r, error = FALSE, message=FALSE}
 library(tidyverse)
 library(lubridate)
@@ -193,7 +197,11 @@ EMS_table_2 <- EMS_data %>% filter(Final_Incident_Type == "2. Non-Life Threateni
 ```
 
 ```{r,message=FALSE}
-EMS_table_final <- left_join(EMS_table_1, EMS_table_2); EMS_table_final
+EMS_table_final <- left_join(EMS_table_1, EMS_table_2);
+```
+
+```{r}
+names(EMS_table_final)[1] <- "Year"
 ```
 
 
@@ -286,6 +294,7 @@ Residual standard deviation = 28.5456
 ```{r, echo = TRUE,results="hide", cache=TRUE}
 ts_EMS_final_1_fit_arima <- auto.arima(ts_EMS_final_1, d = 1, stepwise = FALSE, approximation = FALSE, trace = TRUE);
 ```
+
 ```{r}
 print(summary(ts_EMS_final_1_fit_arima))
 ```
@@ -345,7 +354,7 @@ These calls begin at a longer wait time. Like the life threatening medical emerg
 ## NYPD - 1. Critical Incidents
 
 ```{r}
-NYPD_data %>% filter(Final_Incident_Type == "1. Critical") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+NYPD_table_1 <- NYPD_data %>% filter(Final_Incident_Type == "1. Critical") %>% group_by(year(Week_Start_Date))  %>% summarize("Critical Incidents" = sum(num_of_Incidents_Calculated))
 ```
 
 
@@ -379,7 +388,7 @@ ggseasonplot(diff(ts_NYPD_data_1)) + ggtitle("Seasonal Plot of Differenced NYPD 
 ## NYPD  2. Serious Incidents 
 
 ```{r}
-NYPD_data %>% filter(Final_Incident_Type == "2. Serious") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+NYPD_table_2 <- NYPD_data %>% filter(Final_Incident_Type == "2. Serious") %>% group_by(year(Week_Start_Date))  %>% summarize("Serious Incidents" = sum(num_of_Incidents_Calculated))
 ```
 
 
@@ -398,7 +407,14 @@ autoplot(ts_NYPD_data_2) +
 ## NYPD 3. Non-Critical Incidents
 
 ```{r}
-NYPD_data %>% filter(Final_Incident_Type == "3. Non-Critical") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+NYPD_table_3 <- NYPD_data %>% filter(Final_Incident_Type == "3. Non-Critical") %>% group_by(year(Week_Start_Date))  %>% summarize("Non-Critical Incidents" = sum(num_of_Incidents_Calculated))
+```
+
+```{r}
+NYPD_table_final <- left_join(NYPD_table_1,NYPD_table_2, by = "year(Week_Start_Date)")
+NYPD_table_final <- left_join(NYPD_table_final,NYPD_table_3, by = "year(Week_Start_Date)");
+names(NYPD_table_final)[1] <- "Year"
+NYPD_table_final
 ```
 
 
@@ -490,7 +506,7 @@ ggplot(FDNY_data, aes(x = Week_Start_Date, y = Call_to_Agency_Arrival)) +
 ## FDNY - 1. Structural Fires
 
 ```{r}
-FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+FDNY_table_1 <- FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize("Stuctural Fires" = sum(num_of_Incidents_Calculated))
 ```
 
 
@@ -523,7 +539,12 @@ ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: C
 ## FDNY - 2. Structural Fires
 
 ```{r}
-FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+FDNY_table_2 <- FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize("Non-Structural Fires" = sum(num_of_Incidents_Calculated))
+```
+
+```{r}
+FDNY_table_final <- left_join(FDNY_table_1,FDNY_table_2, by = "year(Week_Start_Date)")
+names(FDNY_table_final)[1] <- "Year"
 ```
 
 
