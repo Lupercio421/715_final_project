@@ -184,6 +184,19 @@ class(EMS_data)
 
 ## EMS Part 2
 
+```{r}
+EMS_table_1 <- EMS_data %>% filter(Final_Incident_Type == "1. Life Threating Med Emergencies") %>% group_by(year(Week_Start_Date))  %>% summarize("Life Threating Med Emergencies" = sum(num_of_Incidents_Calculated));
+```
+
+```{r}
+EMS_table_2 <- EMS_data %>% filter(Final_Incident_Type == "2. Non-Life Threatening Med Emergencies") %>% group_by(year(Week_Start_Date)) %>% summarize("Non-Life Threating Med Emergencies" = sum(num_of_Incidents_Calculated));
+```
+
+```{r,message=FALSE}
+EMS_table_final <- left_join(EMS_table_1, EMS_table_2); EMS_table_final
+```
+
+
 ## Life Threatening Emergencies
 
 ```{r}
@@ -332,6 +345,11 @@ These calls begin at a longer wait time. Like the life threatening medical emerg
 ## NYPD - 1. Critical Incidents
 
 ```{r}
+NYPD_data %>% filter(Final_Incident_Type == "1. Critical") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+```
+
+
+```{r}
 NYPD_data_1 <- NYPD_data %>% filter(Final_Incident_Type == "1. Critical")
 ts_NYPD_data_1 <- ts(NYPD_data_1[,8], freq = 365.25/7, start = 2015+0/365.25)
 ```
@@ -361,6 +379,11 @@ ggseasonplot(diff(ts_NYPD_data_1)) + ggtitle("Seasonal Plot of Differenced NYPD 
 ## NYPD  2. Serious Incidents 
 
 ```{r}
+NYPD_data %>% filter(Final_Incident_Type == "2. Serious") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+```
+
+
+```{r}
 NYPD_data_2 <- NYPD_data %>% filter(Final_Incident_Type == "2. Serious")
 ts_NYPD_data_2 <- ts(NYPD_data_2[,8], freq = 365.25/7, start = 2015+0/365.25)
 ```
@@ -373,6 +396,11 @@ autoplot(ts_NYPD_data_2) +
 ```
 
 ## NYPD 3. Non-Critical Incidents
+
+```{r}
+NYPD_data %>% filter(Final_Incident_Type == "3. Non-Critical") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+```
+
 
 ```{r}
 NYPD_data_3 <- NYPD_data %>% filter(Final_Incident_Type == "3. Non-Critical")
@@ -462,6 +490,11 @@ ggplot(FDNY_data, aes(x = Week_Start_Date, y = Call_to_Agency_Arrival)) +
 ## FDNY - 1. Structural Fires
 
 ```{r}
+FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+```
+
+
+```{r}
 FDNY_data_1 <- FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires")
 
 ts_FDNY_data_1 <- ts(FDNY_data_1[,12], freq = 365.25/7, start = 2015+0/365.25)
@@ -488,6 +521,11 @@ ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: C
 
 
 ## FDNY - 2. Structural Fires
+
+```{r}
+FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize(num_of_Incidents_Calculated = sum(num_of_Incidents_Calculated))
+```
+
 
 ```{r}
 FDNY_data_2 <- FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires")
