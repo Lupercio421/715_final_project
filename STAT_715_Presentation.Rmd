@@ -32,7 +32,7 @@ EMS workers respond to two different calls, "Life Threatening Medical Emergencie
 
 -Compare the time series
 
-```{r}
+```{r, echo = FALSE}
 EMS_table_final %>% kbl(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
 ```
 
@@ -40,7 +40,7 @@ Let us compare the time series of the two types of incidents
 
 ### Life-Threatening
 
-```{r}
+```{r, echo = FALSE}
 autoplot(ts_EMS_final_1) +
   ggtitle("Life Threatening Medical Emergencies: First Call to EMS arrival") +
   ylab("Seconds") + theme(panel.background = element_rect(fill = NA, 
@@ -50,7 +50,7 @@ autoplot(ts_EMS_final_1) +
 
 ### Non-Life Threatening
 
-```{r}
+```{r, fig.width=10, fig.height=7, echo = FALSE}
 autoplot(ts_EMS_final_2) +
   ggtitle("Non-Life Threatening Medical Emergencies: First Call to EMS arrival") +
   ylab("Seconds") + theme(panel.background = element_rect(fill = NA, 
@@ -64,7 +64,7 @@ Let us focus on Life Threatening Medical Emergencies.
 
 The differenced time series uses the value of week 2 minus week 1 of 2015, week 3 minus week 2, so on. 
 
-```{r}
+```{r, fig.width=10, fig.height=7, echo = FALSE}
 ts_EMS_final_1_diff <- diff(ts_EMS_final_1)
 autoplot(ts_EMS_final_1_diff) +
   ggtitle("Differenced Life Threatening Medical Emergencies: First Call to EMS arrival" )+
@@ -73,12 +73,12 @@ autoplot(ts_EMS_final_1_diff) +
 
 The trend is removed, fluctuations do exist. Now, assuming this new series is stationary, let us investigate seasonality.
 
-```{r, fig.width=10, fig.height=7, error = FALSE}
+```{r, fig.width=10, fig.height=7, error = FALSE, echo = FALSE}
 ggseasonplot(ts_EMS_final_1_diff) + ggtitle("Seasonal Plot: Change in First Call to EMS arrival") + ylab("Seconds")+ theme_minimal()
 ```
 
 
-```{r}
+```{r, fig.width=10, fig.height=7, echo = FALSE}
 gglagplot(ts_EMS_final_1_diff, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.lines = FALSE) + ggtitle("Lag Plot") + theme(legend.title = element_blank())
 ```
 
@@ -112,7 +112,81 @@ Out test statistic tells us that we fail to reject the null hypothesis, and conc
 forecast(ts_EMS_final_1_fit_arima, h = 52)
 ```
 
-```{r}
+```{r, fig.width=10, fig.height=7}
 autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52))
+```
+
+# NYPD
+
+```{r, fig.width=10, fig.height=7, echo = FALSE}
+NYPD_table_final %>% kbl(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
+```
+
+```{r, fig.width=10,fig.height=7, echo = FALSE}
+ggplot(NYPD_data, aes(x = (Week_Start_Date), y = Call_to_Agency_Arrival)) + geom_line(aes(color = Final_Incident_Type), size = 1) + theme(panel.background = element_rect(fill = "antiquewhite1"), 
+    plot.background = element_rect(fill = "whitesmoke"), 
+    legend.key = element_rect(fill = "whitesmoke"), 
+    legend.background = element_rect(fill = "whitesmoke")) +labs(title = "Time Series Plot:  Call to NYPD Arrival", 
+    y = "Seconds")+labs(colour = "Incident Type", x = "Year") 
+```
+
+
+We will fit an ARIMA() model using the 
+
+```{r, fig.width=10, fig.height=7, echo = FALSE}
+ggseasonplot(diff(ts_NYPD_data_1)) + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    plot.title = element_text(face = "bold"), 
+    panel.background = element_rect(fill = "antiquewhite1"), 
+    plot.background = element_rect(fill = "whitesmoke"), 
+    legend.background = element_rect(fill = NA)) +labs(title = "Seasonal Plot of the Differenced NYPD Critical Incidents Data", 
+    y = "Seconds", colour = "Year") 
+```
+
+```{r}
+print(summary(ts_NYPD_data_1_fit_arima))
+```
+
+```{r}
+checkresiduals(ts_NYPD_data_1_fit_arima)
+```
+
+```{r}
+qchisq(.95, 48)
+```
+
+```{r, results='hide'}
+forecast(ts_NYPD_data_1_fit_arima, h = 52);
+```
+```{r, fig.width=10, fig.height=7}
+autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52)) + labs(y = "Seconds")
+```
+
+# FDNY
+
+```{r, echo=FALSE}
+FDNY_table_final %>% kable(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
+```
+
+```{r,fig.width=10,fig.height=7, echo=FALSE}
+ggplot(FDNY_data, aes(x = Week_Start_Date, y = Call_to_Agency_Arrival)) + 
+  geom_line(aes(color = Final_Incident_Type), size = 1) +
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "green", "black")) +
+  theme_minimal()+labs(title = "Time Series Plot: Call to FDNY Arrival", 
+    y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite1"), 
+    plot.background = element_rect(fill = "whitesmoke"), 
+    legend.background = element_rect(fill = "gray90")) + theme(panel.grid.major = element_line(linetype = "twodash"), 
+    panel.grid.minor = element_line(linetype = "twodash")) + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(x = "Year", colour = "Incident Type")
+```
+
+```{r, fig.width=10, fig.height=7, echo = FALSE}
+autoplot(ts_FDNY_data_1) +
+  ggtitle("Structural Fires: First Call to FDNY arrival" )+
+  ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    panel.background = element_rect(fill = "antiquewhite"), 
+    plot.background = element_rect(fill = "whitesmoke"))
+
 ```
 
