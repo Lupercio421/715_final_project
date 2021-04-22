@@ -514,9 +514,12 @@ FDNY_table_1 <- FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires
 FDNY_data_1 <- FDNY_data %>% filter(Final_Incident_Type == "1. Structural Fires")
 
 ts_FDNY_data_1 <- ts(FDNY_data_1[,12], freq = 365.25/7, start = 2015+0/365.25)
+```
 
+### Alone Structural Fires
+```{r}
 autoplot(ts_FDNY_data_1) +
-  ggtitle("Structural Fires: First Call to FDNY arrival" )+
+  ggtitle("Structural Fires: First Call to FDNY arrival") +
   ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
     panel.grid.minor = element_line(linetype = "dotted"), 
     panel.background = element_rect(fill = "antiquewhite"), 
@@ -524,19 +527,19 @@ autoplot(ts_FDNY_data_1) +
 
 ```
 
-#### Differenced Data
+#### Seasonal Plot of the Differenced Structural Fires Data
 
 ```{r, fig.width=10,fig.height=7}
-ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: Call to FDNY Arrival", 
+ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: First Call to FDNY Arrival", 
     y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite1"), 
     plot.background = element_rect(fill = "whitesmoke"), 
     legend.background = element_rect(fill = "gray90")) + theme(panel.grid.major = element_line(linetype = "twodash"), 
     panel.grid.minor = element_line(linetype = "twodash")) + theme(panel.grid.major = element_line(linetype = "dotted"), 
-    panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke"))
+    panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(colour = "Year")
 ```
 
 
-## FDNY - 2. Structural Fires
+## FDNY - 2. Non-Structural Fires
 
 ```{r}
 FDNY_table_2 <- FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires") %>% group_by(year(Week_Start_Date))  %>% summarize("Non-Structural Fires" = sum(num_of_Incidents_Calculated))
@@ -552,7 +555,9 @@ names(FDNY_table_final)[1] <- "Year"
 FDNY_data_2 <- FDNY_data %>% filter(Final_Incident_Type == "2. Non-Structural Fires")
 
 ts_FDNY_data_2 <- ts(FDNY_data_2[,12], freq = 365.25/7, start = 2015+0/365.25)
+```
 
+```{r, fig.width=10, fig.height=7,}
 autoplot(ts_FDNY_data_2) +
   ggtitle("Non-Structural Fires: First Call to FDNY arrival" )+
   ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
@@ -560,9 +565,45 @@ autoplot(ts_FDNY_data_2) +
     panel.background = element_rect(fill = "antiquewhite"), 
     plot.background = element_rect(fill = "whitesmoke"))
 
-
 ```
 
+Fitting an ARIMA Model to the differenced Structural fires data
+
+```{r, results = 'hide', echo=FALSE}
+ts_FDNY_data_fit <- auto.arima(ts_FDNY_data_1, d = 1, stepwise = FALSE, approximation = FALSE, trace = TRUE);
+```
+
+```{r}
+print(summary(ts_FDNY_data_fit))
+```
+
+```{r, fig.width=10, fig.height=7}
+checkresiduals(ts_FDNY_data_fit)
+```
+```{r}
+qchisq(0.95,50)
+```
+
+Our Q-statistic is again, less than $\chi^2$ at 95% confidence with 2 degrees of freedom. We fail to reject the null hypothesis and conclude $H_0$
+
+### Begin forecasting
+
+```{r}
+forecast(ts_FDNY_data_fit)
+```
+
+```{r, fig.width=10, fig.height=7}
+autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line(linetype = "dashed"), 
+    panel.grid.minor = element_line(linetype = "dashed"), 
+    panel.background = element_rect(fill = "gray96")) +labs(title = "MA(1) with Drift Forecast of Differenced Structural Fires Data", 
+    y = "Seconds")
+```
+
+```{r,fig.width=10, fig.height=7}
+autoplot(forecast(ts_FDNY_data_fit)) + theme(panel.grid.major = element_line(linetype = "dashed"), 
+    panel.grid.minor = element_line(linetype = "dashed"), 
+    panel.background = element_rect(fill = "gray94")) +labs(y = "Seconds")
+```
 
 
 ## FDNY 3. Medical Emergencies
