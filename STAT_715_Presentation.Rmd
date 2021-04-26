@@ -22,18 +22,27 @@ library(ggThemeAssist)
 library(kableExtra)
 ```
 
-# Emergency Medical Services (EMS)
+# Data Description
 
-Begin by introducing its services and the data that comes with it
+* This data was collected and updated by the NYC Mayor's Office of Operations and can be found on NYC Open Data
+* This data focuses around 3 essential responding agencies
+  + Emergency Medical Services
+  + New York Fire Department
+  + New York Police Department
+* This data tracks the emergency incidents of the responding agencies as requested through the 911 phone system.
+* The data is collected monthly, but reported weekly. The dates found in the data represent the first Monday of the week. So we will look at data for the following 7 days, beginning on the date reported.
+* Our variable of interest is "Call to Agency Arrival." 
+  + This attribute provides the average amount of time, in seconds, from when a 911 call is initiated, to when an agency arrives on scene.
+* We will provide time series models for incidents that occurred from the 2015 to the end of 2019.
+
+
+
+# Emergency Medical Services (EMS)
 
 EMS workers respond to two different calls, "Life Threatening Medical Emergencies" and "Non-life Threatening Medical Emergencies"
 
--Create a table of counts
-
--Compare the time series
-
 ```{r, echo = FALSE}
-EMS_table_final %>% kbl(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
+(EMS_table_final) %>% kbl(caption = "Number of Incidents Occured", align = 'c') %>% kable_classic(full_width = F) %>% kable_styling(bootstrap_options = "striped",full_width = FALSE, position = "center")
 ```
 
 Let us compare the time series of the two types of incidents
@@ -113,13 +122,13 @@ forecast(ts_EMS_final_1_fit_arima, h = 52)
 ```
 
 ```{r, fig.width=10, fig.height=7}
-autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52))
+autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52)) +labs(title = "ARIMA(3,1,1) Forecast of Life Threatening Emergencies Data", y = "Seconds")
 ```
 
 # NYPD
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
-NYPD_table_final %>% kbl(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
+NYPD_table_final %>% kbl(caption = "Number of Incidents Occured", align = 'c') %>% kable_classic(full_width = F) %>% kable_styling(bootstrap_options = "striped")
 ```
 
 ```{r, fig.width=10,fig.height=7, echo = FALSE}
@@ -131,8 +140,6 @@ ggplot(NYPD_data, aes(x = (Week_Start_Date), y = Call_to_Agency_Arrival)) + geom
 ```
 
 
-We will fit an ARIMA() model using the 
-
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 ggseasonplot(diff(ts_NYPD_data_1)) + theme(panel.grid.major = element_line(linetype = "dotted"), 
     panel.grid.minor = element_line(linetype = "dotted"), 
@@ -142,6 +149,8 @@ ggseasonplot(diff(ts_NYPD_data_1)) + theme(panel.grid.major = element_line(linet
     legend.background = element_rect(fill = NA)) +labs(title = "Seasonal Plot of the Differenced NYPD Critical Incidents Data", 
     y = "Seconds", colour = "Year") 
 ```
+
+We will fit an ARIMA() model using the auto.arima() function and this is our output:
 
 ```{r}
 print(summary(ts_NYPD_data_1_fit_arima))
@@ -159,13 +168,13 @@ qchisq(.95, 48)
 forecast(ts_NYPD_data_1_fit_arima, h = 52);
 ```
 ```{r, fig.width=10, fig.height=7}
-autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52)) + labs(y = "Seconds")
+autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52)) + labs(title = "MA(3) with Drift Forecast of Critical Inicidents Data",y = "Seconds")
 ```
 
 # FDNY
 
 ```{r, echo=FALSE}
-FDNY_table_final %>% kable(caption = "Number of Incidents Occured") %>% kable_classic(full_width = F) %>% kable_styling(position = "center")
+FDNY_table_final %>% kable(caption = "Number of Incidents Occured", align = 'c') %>% kable_classic(full_width = F) %>% kable_styling(bootstrap_options = "striped")
 ```
 
 ```{r,fig.width=10,fig.height=7, echo=FALSE}
@@ -188,5 +197,49 @@ autoplot(ts_FDNY_data_1) +
     panel.background = element_rect(fill = "antiquewhite"), 
     plot.background = element_rect(fill = "whitesmoke"))
 
+```
+
+Let us plot the differenced Structural Fires data:
+
+```{r, fig.width=10,fig.height=7}
+ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: First Call to FDNY Arrival of Structural Fires", 
+    y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite1"), 
+    plot.background = element_rect(fill = "whitesmoke"), 
+    legend.background = element_rect(fill = "gray90")) + theme(panel.grid.major = element_line(linetype = "twodash"), 
+    panel.grid.minor = element_line(linetype = "twodash")) + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(colour = "Year")
+```
+
+Fitting an ARIMA Model to the differenced Structural fires data
+
+
+```{r}
+print(summary(ts_FDNY_data_fit))
+```
+```{r, fig.width=10, fig.height=7}
+checkresiduals(ts_FDNY_data_fit)
+```
+
+```{r}
+qchisq(0.95,50)
+```
+
+Our Q-statistic is again, less than $\chi^2$ at 95% confidence with 2 degrees of freedom. We fail to reject the null hypothesis and conclude $H_0$
+
+### Begin forecasting
+
+```{r}
+forecast(ts_FDNY_data_fit)
+```
+
+```{r, fig.width=10, fig.height=7}
+autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line(linetype = "dashed"), 
+    panel.grid.minor = element_line(linetype = "dashed"), 
+    panel.background = element_rect(fill = "gray96")) +labs(title = "MA(1) with Drift Forecast of Differenced Structural Fires Data", 
+    y = "Seconds")
+```
+
+```{r}
+autoplot(forecast(ts_FDNY_data_fit), h = 52) + labs(title = "MA(1) with Drift Forecast of Structural Fires Data", y = "Seconds")
 ```
 

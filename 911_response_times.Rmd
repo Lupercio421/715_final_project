@@ -524,13 +524,12 @@ autoplot(ts_FDNY_data_1) +
     panel.grid.minor = element_line(linetype = "dotted"), 
     panel.background = element_rect(fill = "antiquewhite"), 
     plot.background = element_rect(fill = "whitesmoke"))
-
 ```
 
 #### Seasonal Plot of the Differenced Structural Fires Data
 
 ```{r, fig.width=10,fig.height=7}
-ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: First Call to FDNY Arrival", 
+ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: First Call to FDNY Arrival of Structural Fires", 
     y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite1"), 
     plot.background = element_rect(fill = "whitesmoke"), 
     legend.background = element_rect(fill = "gray90")) + theme(panel.grid.major = element_line(linetype = "twodash"), 
