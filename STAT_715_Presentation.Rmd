@@ -1,17 +1,17 @@
 ---
-title: "STAT 715 Presentation"
+title: "STAT 715 - Time Series Project"
 author: "Daniel L."
-date: "4/19/2021"
+date: "4/27/2021"
 output: html_document
 ---
-
-rmarkdown::render("STAT_715_Presentation.Rmd")
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, error = FALSE, message=FALSE, echo=FALSE}
+### adf.test()
+#rmarkdown::render("STAT_715_Presentation.Rmd")
 library(tidyverse)
 library(lubridate)
 library(fable)
@@ -22,13 +22,15 @@ library(ggThemeAssist)
 library(kableExtra)
 ```
 
+
+
 # Data Description
 
 * This data was collected and updated by the NYC Mayor's Office of Operations and can be found on NYC Open Data
 * This data focuses around 3 essential responding agencies
   + Emergency Medical Services
-  + New York Fire Department
-  + New York Police Department
+  + New York City Fire Department
+  + New York City Police Department
 * This data tracks the emergency incidents of the responding agencies as requested through the 911 phone system.
 * The data is collected monthly, but reported weekly. The dates found in the data represent the first Monday of the week. So we will look at data for the following 7 days, beginning on the date reported.
 * Our variable of interest is "Call to Agency Arrival." 
@@ -46,7 +48,7 @@ EMS workers respond to two different calls, "Life Threatening Medical Emergencie
 
 Let us compare the time series of the two types of incidents
 
-### Life-Threatening
+####  Life-Threatening
 
 ```{r, echo = FALSE}
 autoplot(ts_EMS_final_1) +
@@ -56,7 +58,7 @@ autoplot(ts_EMS_final_1) +
     colour = NA))
 ```
 
-### Non-Life Threatening
+####  Non-Life Threatening
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 autoplot(ts_EMS_final_2) +
@@ -95,7 +97,6 @@ gglagplot(ts_EMS_final_1_diff, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.li
 gglagplot(ts_EMS_final_1, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.lines = FALSE) + ggtitle("Lag Plot") + theme(legend.title = element_blank())
 ```
 
-
 Here, we can not specify a positive or negative linear trend. 
 
 ```{r,echo=FALSE}
@@ -112,14 +113,13 @@ print(summary(ts_EMS_final_1_fit_arima))
 ```{r}
 checkresiduals(ts_EMS_final_1_fit_arima)
 ```
-
-Autocorrelation measures the linear relationship between lagged values of a time series.This reinforces my claim that we do not see a strong negative or positive trend in the lagged time series
+Autocorrelation measures the linear relationship between lagged values of a time series. This reinforces my claim that we do not see a strong negative or positive trend in the lagged time series
 
 The number of lags used is 52, so our degrees of freedom for the residuals is 52-3-1 = 48. The upper tail $\chi^2$ evaluated at $\alpha = .05$ with 48 degrees of freedom is 65.171. Our test statistic, Q* = 41.052 and is $\leq$ 65.171. 
 
 $H_0$: This ARIMA(3,1,1) model does not exhibit lack of fit vs $H_a$: This model exhibits lack of fit.
 
-Out test statistic tells us that we fail to reject the null hypothesis, and conclude $H_0$. This model does not exhibit has significant lack of fit.
+Out test statistic tells us that we fail to reject the null hypothesis, and conclude $H_0$. This model does not exhibit significant lack of fit.
 
 ## Begin forecasting
 
@@ -127,7 +127,7 @@ Out test statistic tells us that we fail to reject the null hypothesis, and conc
 forecast(ts_EMS_final_1_fit_arima, h = 52)
 ```
 
-```{r, fig.width=10, fig.height=7}
+```{r, echo = FALSE, fig.width=10, fig.height=7}
 autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52)) + labs(title = "ARIMA(3,1,1) Forecast of Life Threatening Emergencies Data", y = "Seconds")
 ```
 
@@ -145,6 +145,18 @@ ggplot(NYPD_data, aes(x = (Week_Start_Date), y = Call_to_Agency_Arrival)) + geom
     y = "Seconds")+labs(colour = "Incident Type", x = "Year") 
 ```
 
+#### Let us plot the Critical Incidents time series
+
+```{r, echo = FALSE,fig.width=10, fig.height=7}
+autoplot(ts_NYPD_data_1) +
+  ggtitle("Critical Incidents: First Call to NYPD arrival" )+
+  ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    panel.background = element_rect(fill = "antiquewhite"), 
+    plot.background = element_rect(fill = "whitesmoke"))
+```
+
+# Let us plot differenced critical incidents time series
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 ggseasonplot(diff(ts_NYPD_data_1)) + theme(panel.grid.major = element_line(linetype = "dotted"), 
@@ -180,13 +192,13 @@ We conclude $H_0$.
 forecast(ts_NYPD_data_1_fit_arima, h = 52);
 ```
 
-```{r, fig.width=10, fig.height=7}
+```{r,echo = FALSE, fig.width=10, fig.height=7}
 autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52)) + labs(title = "MA(3) with Drift Forecast of Critical Inicidents Data",y = "Seconds")
 ```
 
 # FDNY
 
-```{r, echo=FALSE}
+```{r,echo=FALSE, fig.width=10, fig.height=7}
 FDNY_table_final %>% kable(caption = "Number of Incidents Occured", align = 'c') %>% kable_classic(full_width = F) %>% kable_styling(bootstrap_options = "striped")
 ```
 
@@ -204,6 +216,8 @@ ggplot(FDNY_data, aes(x = Week_Start_Date, y = Call_to_Agency_Arrival)) +
 
 There appears to be a strange spike in response times for three of the incident types. The data dictionary provided advises that if the volume of incidents surpasses a point, response times will degenerate. 
 
+#### Let us isolate the structural fire time series 
+
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 autoplot(ts_FDNY_data_1) +
   ggtitle("Structural Fires: First Call to FDNY arrival" )+
@@ -211,12 +225,12 @@ autoplot(ts_FDNY_data_1) +
     panel.grid.minor = element_line(linetype = "dotted"), 
     panel.background = element_rect(fill = "antiquewhite"), 
     plot.background = element_rect(fill = "whitesmoke"))
-
 ```
 
-Let us plot the differenced Structural Fires data:
 
-```{r, fig.width=10,fig.height=7}
+#### Let us plot the differenced Structural Fires time series:
+
+```{r, echo = FALSE, fig.width=10,fig.height=7}
 ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: First Call to FDNY Arrival of Structural Fires", 
     y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite1"), 
     plot.background = element_rect(fill = "whitesmoke"), 
@@ -238,7 +252,7 @@ checkresiduals(ts_FDNY_data_fit)
 qchisq(0.95,50)
 ```
 
-Our Q-statistic is again, less than $\chi^2$ at 95% confidence with 50 degrees of freedom. We fail to reject the null hypothesis and conclude $H_0$
+Our Q-statistic is again, less than $\chi^2$ at $\alpha = 0.05$ with 50 degrees of freedom. We fail to reject the null hypothesis and conclude $H_0$
 
 ### Begin forecasting
 
@@ -246,7 +260,7 @@ Our Q-statistic is again, less than $\chi^2$ at 95% confidence with 50 degrees o
 forecast(ts_FDNY_data_fit)
 ```
 
-```{r, fig.width=10, fig.height=7}
+```{r,echo = FALSE, fig.width=10, fig.height=7}
 autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line(linetype = "dashed"), 
     panel.grid.minor = element_line(linetype = "dashed"), 
     panel.background = element_rect(fill = "gray96")) +labs(title = "MA(1) with Drift Forecast of Differenced Structural Fires Data", 
@@ -257,4 +271,4 @@ autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line
 autoplot(forecast(ts_FDNY_data_fit), h = 52) + labs(title = "MA(1) with Drift Forecast of Structural Fires Data", y = "Seconds")
 ```
 
-# Thank you. Any questions? I would appreciate any constructive criticism.
+# Any questions? I would appreciate any constructive criticism. Thank you!
