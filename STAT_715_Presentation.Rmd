@@ -36,7 +36,6 @@ library(kableExtra)
 * We will provide time series models for incidents that occurred from the 2015 to the end of 2019.
 
 
-
 # Emergency Medical Services (EMS)
 
 EMS workers respond to two different calls, "Life Threatening Medical Emergencies" and "Non-life Threatening Medical Emergencies"
@@ -86,18 +85,23 @@ The trend is removed, fluctuations do exist. Now, assuming this new series is st
 ggseasonplot(ts_EMS_final_1_diff) + ggtitle("Seasonal Plot: Change in First Call to EMS arrival") + ylab("Seconds")+ theme_minimal()
 ```
 
+### These lag plots show our differenced time series $y_t$, plotted against $y_{t-k}$ for k $\in$ [1, 2, 3, 4]
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 gglagplot(ts_EMS_final_1_diff, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.lines = FALSE) + ggtitle("Lag Plot") + theme(legend.title = element_blank())
 ```
 
+```{r, include="false", echo=FALSE}
+gglagplot(ts_EMS_final_1, lags = 4, set.lags = 1:4, sesaonal = FALSE, do.lines = FALSE) + ggtitle("Lag Plot") + theme(legend.title = element_blank())
+```
+
+
 Here, we can not specify a positive or negative linear trend. 
 
 ```{r,echo=FALSE}
 #ggAcf(ts_EMS_final_1_diff) + ggtitle("Autocorrelation Plot: Differenced Life Threatening Emergencies Time Series")
+#Lags 1 and 2 go beyond the 95% confidence intervals.
 ```
-
-Lags 1 and 2 go beyond the 95% confidence intervals.
 
 ### Let us model the differenced data with ARIMA
 
@@ -108,6 +112,8 @@ print(summary(ts_EMS_final_1_fit_arima))
 ```{r}
 checkresiduals(ts_EMS_final_1_fit_arima)
 ```
+
+Autocorrelation measures the linear relationship between lagged values of a time series.This reinforces my claim that we do not see a strong negative or positive trend in the lagged time series
 
 The number of lags used is 52, so our degrees of freedom for the residuals is 52-3-1 = 48. The upper tail $\chi^2$ evaluated at $\alpha = .05$ with 48 degrees of freedom is 65.171. Our test statistic, Q* = 41.052 and is $\leq$ 65.171. 
 
@@ -122,7 +128,7 @@ forecast(ts_EMS_final_1_fit_arima, h = 52)
 ```
 
 ```{r, fig.width=10, fig.height=7}
-autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52)) +labs(title = "ARIMA(3,1,1) Forecast of Life Threatening Emergencies Data", y = "Seconds")
+autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52)) + labs(title = "ARIMA(3,1,1) Forecast of Life Threatening Emergencies Data", y = "Seconds")
 ```
 
 # NYPD
@@ -164,9 +170,16 @@ checkresiduals(ts_NYPD_data_1_fit_arima)
 qchisq(.95, 48)
 ```
 
+The number of lags used is 52, so our degrees of freedom for the residuals is 52-4 = 48. The upper tail $\chi^2$ evaluated at $\alpha = .05$ with 48 degrees of freedom is 65.171. Our test statistic, Q* = 47.752 and is $\leq$ 65.171.
+
+$H_0$: This ARIMA(0,1,3) with drift time series does not exhibit lack of fit. Vs $H_a$: This time series model exhibits lack of fit. 
+
+We conclude $H_0$.
+
 ```{r, results='hide'}
 forecast(ts_NYPD_data_1_fit_arima, h = 52);
 ```
+
 ```{r, fig.width=10, fig.height=7}
 autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52)) + labs(title = "MA(3) with Drift Forecast of Critical Inicidents Data",y = "Seconds")
 ```
@@ -189,6 +202,8 @@ ggplot(FDNY_data, aes(x = Week_Start_Date, y = Call_to_Agency_Arrival)) +
     panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(x = "Year", colour = "Incident Type")
 ```
 
+There appears to be a strange spike in response times for three of the incident types. The data dictionary provided advises that if the volume of incidents surpasses a point, response times will degenerate. 
+
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 autoplot(ts_FDNY_data_1) +
   ggtitle("Structural Fires: First Call to FDNY arrival" )+
@@ -210,8 +225,7 @@ ggseasonplot(diff(ts_FDNY_data_1)) +labs(title = "Time Series Difference Plot: F
     panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(colour = "Year")
 ```
 
-Fitting an ARIMA Model to the differenced Structural fires data
-
+### Fitting an ARIMA Model to the differenced Structural Fires data
 
 ```{r}
 print(summary(ts_FDNY_data_fit))
@@ -224,11 +238,11 @@ checkresiduals(ts_FDNY_data_fit)
 qchisq(0.95,50)
 ```
 
-Our Q-statistic is again, less than $\chi^2$ at 95% confidence with 2 degrees of freedom. We fail to reject the null hypothesis and conclude $H_0$
+Our Q-statistic is again, less than $\chi^2$ at 95% confidence with 50 degrees of freedom. We fail to reject the null hypothesis and conclude $H_0$
 
 ### Begin forecasting
 
-```{r}
+```{r, results='hide'}
 forecast(ts_FDNY_data_fit)
 ```
 
@@ -239,7 +253,8 @@ autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line
     y = "Seconds")
 ```
 
-```{r}
+```{r,echo=FALSE,fig.width=10, fig.height=7}
 autoplot(forecast(ts_FDNY_data_fit), h = 52) + labs(title = "MA(1) with Drift Forecast of Structural Fires Data", y = "Seconds")
 ```
 
+# Thank you. Any questions? I would appreciate any constructive criticism.
