@@ -75,10 +75,7 @@ Let us focus on Life Threatening Medical Emergencies.
 The differenced time series uses the value of week 2 minus week 1 of 2015, week 3 minus week 2, so on. 
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
-ts_EMS_final_1_diff <- diff(ts_EMS_final_1)
-autoplot(ts_EMS_final_1_diff) +
-  ggtitle("Differenced Life Threatening Medical Emergencies: First Call to EMS arrival" )+
-  ylab("Seconds")
+c
 ```
 
 The trend is removed, fluctuations do exist. Now, assuming this new series is stationary, let us investigate seasonality.
