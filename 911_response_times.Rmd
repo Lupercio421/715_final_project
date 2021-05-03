@@ -17,6 +17,7 @@ library(TSA)
 #load forescasting package
 library(fpp2)
 library(ggThemeAssist)
+library(tseries)
 ```
 
 
@@ -308,14 +309,24 @@ $H_0$: This ARIMA(3,1,1) model does not exhibit lack of fit. Compared to $H_a$: 
 
 Out test statistic tells us that we fail to reject the null hypothesis, and conclude $H_0$. This model does not exhibit has significant lack of fit.
 
+### Dickey Fuller Test
+
+The null hypothesis for the Dickey-Fuller and Augmented Dickey-Fuller test for both tests is that the data are non-stationary. We want to REJECT the null hypothesis for this test, so we want a p-value of less than 0.05.
+
+```{r}
+adf.test(diff(ts_EMS_final_1))
+```
+
+With a p-value of 0.01, we reject the null hypothesis and conclude $H_a:$ this differenced time series is stationary.
+
 ## Begin forecasting
 
 ```{r, results = 'hide'}
-forecast(ts_EMS_final_1_fit_arima, h = 36)
+forecast(ts_EMS_final_1_fit_arima, h = 12)
 ```
 
 ```{r}
-autoplot(forecast(ts_EMS_final_1_fit_arima, h = 36))
+autoplot(forecast(ts_EMS_final_1_fit_arima, h = 12))
 ```
 
 
@@ -424,7 +435,7 @@ NYPD_data_3 <- NYPD_data %>% filter(Final_Incident_Type == "3. Non-Critical")
 ts_NYPD_data_3 <- ts(NYPD_data_3[,8], freq = 365.25/7, start = 2015+0/365.25)
 
 autoplot(ts_NYPD_data_3) +
-  ggtitle("Non-Critical Incidents: First Call to NYPD arrival" )+
+  ggtitle("Non-Critical Incidents: First Call to NYPD arrival") +
   ylab("Seconds")
 ```
 
@@ -458,6 +469,11 @@ ggseasonplot(diff(ts_NYPD_data_1)) + theme(panel.grid.major = element_line(linet
     y = "Seconds", colour = "Year") 
 ```
 
+### Dickey Fuller Test
+
+```{r}
+adf.test(diff(ts_NYPD_data_1))
+```
 
 ### Let us create a time series model with the NYPD's critical incidents data
 
@@ -467,6 +483,10 @@ ts_NYPD_data_1_fit_arima <- auto.arima(ts_NYPD_data_1, d = 1, stepwise = FALSE, 
 
 ```{r}
 print(summary(ts_NYPD_data_1_fit_arima))
+coef(ts_NYPD_data_1_fit_arima)
+```
+```{r}
+auto.arima(ts_NYPD_data_1, d = 1, stepwise = FALSE, approximation = FALSE, trace = TRUE, max.p = 0, max.q = 3)
 ```
 
 ```{r}
@@ -477,14 +497,34 @@ checkresiduals(ts_NYPD_data_1_fit_arima)
 qchisq(.95, 48)
 ```
 
+
 ### Begin forecasting
 
 ```{r, results='hide'}
-forecast(ts_EMS_final_1_diff, h = 52)
+forecast(ts_NYPD_data_1_fit_arima, h = 12)
 ```
 
 ```{r}
-autoplot(forecast(ts_EMS_final_1_diff, h = 52))
+autoplot(forecast(ts_NYPD_data_1_fit_arima), h = 12) + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted")) + labs(title = "Forecasts from Critical Incidents ARIMA(0,1,3) with drift", y = "Seconds")
+```
+
+```{r}
+ts_NYPD_data_1_fit_arima_2 <- arma(diff(ts_NYPD_data_1), order = c(0,3), include.intercept = TRUE)
+coef(ts_EMS_final_1_fit_arima_2)
+```
+
+
+```{r}
+```
+
+
+```{r}
+autoplot(forecast(diff(ts_NYPD_data_1), h = 12))
+```
+
+```{r}
+forecast(diff(ts_NYPD_data_1), h = 12)
 ```
 
 
@@ -594,7 +634,7 @@ forecast(ts_FDNY_data_fit)
 ```{r, fig.width=10, fig.height=7}
 autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line(linetype = "dashed"), 
     panel.grid.minor = element_line(linetype = "dashed"), 
-    panel.background = element_rect(fill = "gray96")) +labs(title = "MA(1) with Drift Forecast of Differenced Structural Fires Data", 
+    panel.background = element_rect(fill = "gray96")) + labs(title = "MA(1) with Drift Forecast of Differenced Structural Fires Data", 
     y = "Seconds")
 ```
 
