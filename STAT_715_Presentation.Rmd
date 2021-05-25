@@ -55,7 +55,10 @@ autoplot(ts_EMS_final_1) +
   ggtitle("Life Threatening Medical Emergencies: First Call to EMS arrival") +
   ylab("Seconds") + theme(panel.background = element_rect(fill = NA, 
     linetype = "dotted"), plot.background = element_rect(fill = "white", 
-    colour = NA))
+    colour = NA)) + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    panel.background = element_rect(fill = "antiquewhite"), 
+    plot.background = element_rect(fill = "whitesmoke"))
 ```
 
 ####  Non-Life Threatening
@@ -63,9 +66,10 @@ autoplot(ts_EMS_final_1) +
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 autoplot(ts_EMS_final_2) +
   ggtitle("Non-Life Threatening Medical Emergencies: First Call to EMS arrival") +
-  ylab("Seconds") + theme(panel.background = element_rect(fill = NA, 
-    linetype = "dotted"), plot.background = element_rect(fill = "white", 
-    colour = NA))
+  ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    panel.background = element_rect(fill = "antiquewhite"), 
+    plot.background = element_rect(fill = "whitesmoke"))
 ```
 
 Let us focus on Life Threatening Medical Emergencies.
@@ -75,13 +79,21 @@ Let us focus on Life Threatening Medical Emergencies.
 The differenced time series uses the value of week 2 minus week 1 of 2015, week 3 minus week 2, so on. 
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
-c
+autoplot(diff(ts_EMS_final_1)) +
+  ggtitle("Differenced Threatening Medical Emergencies: First Call to EMS arrival") +
+  ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    panel.background = element_rect(fill = "antiquewhite"), 
+    plot.background = element_rect(fill = "whitesmoke"))
 ```
 
 The trend is removed, fluctuations do exist. Now, assuming this new series is stationary, let us investigate seasonality.
 
 ```{r, fig.width=10, fig.height=7, error = FALSE, echo = FALSE}
-ggseasonplot(ts_EMS_final_1_diff) + ggtitle("Seasonal Plot: Change in First Call to EMS arrival") + ylab("Seconds")+ theme_minimal()
+ggseasonplot(ts_EMS_final_1_diff) + ggtitle("Seasonal Plot: Change in First Call to EMS arrival") + ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
+    panel.grid.minor = element_line(linetype = "dotted"), 
+    panel.background = element_rect(fill = "antiquewhite"), 
+    plot.background = element_rect(fill = "whitesmoke")) + labs(colour = "Year") + theme(legend.background = element_rect(fill = "whitesmoke"))
 ```
 
 ### These lag plots show our differenced time series $y_t$, plotted against $y_{t-k}$ for k $\in$ [1, 2, 3, 4]
@@ -125,7 +137,7 @@ forecast(ts_EMS_final_1_fit_arima, h = 52)
 ```
 
 ```{r, echo = FALSE, fig.width=10, fig.height=7}
-autoplot(forecast(ts_EMS_final_1_fit_arima, h = 52)) + labs(title = "ARIMA(3,1,1) Forecast of Life Threatening Emergencies Data", y = "Seconds")
+autoplot(forecast(ts_EMS_final_1_fit_arima, h = 12)) + labs(title = "ARIMA(3,1,1) Forecast of Life Threatening Emergencies Data", y = "Seconds")
 ```
 
 # NYPD
@@ -158,11 +170,9 @@ autoplot(ts_NYPD_data_1) +
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 ggseasonplot(diff(ts_NYPD_data_1)) + theme(panel.grid.major = element_line(linetype = "dotted"), 
     panel.grid.minor = element_line(linetype = "dotted"), 
-    plot.title = element_text(face = "bold"), 
     panel.background = element_rect(fill = "antiquewhite1"), 
     plot.background = element_rect(fill = "whitesmoke"), 
-    legend.background = element_rect(fill = NA)) +labs(title = "Seasonal Plot of the Differenced NYPD Critical Incidents Data", 
-    y = "Seconds", colour = "Year") 
+    legend.background = element_rect(fill = NA)) +labs(title = "Seasonal Plot of the Differenced NYPD Critical Incidents Data", y = "Seconds", colour = "Year")  + theme(plot.title = element_text(face = "plain"))
 ```
 
 We will fit an ARIMA() model using the auto.arima() function and this is our output:
@@ -190,13 +200,13 @@ forecast(ts_NYPD_data_1_fit_arima, h = 52);
 ```
 
 ```{r,echo = FALSE, fig.width=10, fig.height=7}
-autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 52)) + labs(title = "MA(3) with Drift Forecast of Critical Inicidents Data",y = "Seconds")
+autoplot(forecast(ts_NYPD_data_1_fit_arima, h = 12)) + labs(title = "Forecasts from Critical Incidents ARIMA(0,1,3) with a Constant", y = "Seconds")
 ```
 
 # FDNY
 
 ```{r,echo=FALSE, fig.width=10, fig.height=7}
-FDNY_table_final %>% kable(caption = "Number of Incidents Occured", align = 'c') %>% kable_classic(full_width = F) %>% kable_styling(bootstrap_options = "striped")
+FDNY_table_final2 %>% kable(caption = "Number of Incidents Occured", align = 'c') %>% kable_classic(full_width = F) %>% kable_styling(bootstrap_options = "striped")
 ```
 
 ```{r,fig.width=10,fig.height=7, echo=FALSE}
@@ -204,11 +214,10 @@ ggplot(FDNY_data, aes(x = Week_Start_Date, y = Call_to_Agency_Arrival)) +
   geom_line(aes(color = Final_Incident_Type), size = 1) +
   scale_color_manual(values = c("#00AFBB", "#E7B800", "green", "black")) +
   theme_minimal()+labs(title = "Time Series Plot: Call to FDNY Arrival", 
-    y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite1"), 
+    y = "Seconds") + theme(panel.background = element_rect(fill = "antiquewhite"), 
     plot.background = element_rect(fill = "whitesmoke"), 
     legend.background = element_rect(fill = "gray90")) + theme(panel.grid.major = element_line(linetype = "twodash"), 
-    panel.grid.minor = element_line(linetype = "twodash")) + theme(panel.grid.major = element_line(linetype = "dotted"), 
-    panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(x = "Year", colour = "Incident Type")
+    panel.grid.minor = element_line(linetype = "twodash")) + theme(panel.grid.major = element_line(linetype = "dotted"), panel.grid.minor = element_line(linetype = "dotted")) + theme(legend.background = element_rect(fill = "whitesmoke")) + labs(x = "Year", colour = "Incident Type")
 ```
 
 There appears to be a strange spike in response times for three of the incident types. The data dictionary provided advises that if the volume of incidents surpasses a point, response times will degenerate. 
@@ -217,7 +226,7 @@ There appears to be a strange spike in response times for three of the incident 
 
 ```{r, fig.width=10, fig.height=7, echo = FALSE}
 autoplot(ts_FDNY_data_1) +
-  ggtitle("Structural Fires: First Call to FDNY arrival" )+
+  ggtitle("Structural Fires: First Call to FDNY arrival" ) +
   ylab("Seconds") + theme(panel.grid.major = element_line(linetype = "dotted"), 
     panel.grid.minor = element_line(linetype = "dotted"), 
     panel.background = element_rect(fill = "antiquewhite"), 
@@ -265,7 +274,7 @@ autoplot(forecast(diff(ts_FDNY_data_1))) + theme(panel.grid.major = element_line
 ```
 
 ```{r,echo=FALSE,fig.width=10, fig.height=7}
-autoplot(forecast(ts_FDNY_data_fit), h = 52) + labs(title = "MA(1) with Drift Forecast of Structural Fires Data", y = "Seconds")
+autoplot(forecast(ts_FDNY_data_fit), h = 52) + labs(title = "MA(1) with a Constant Forecast of Structural Fires Data", y = "Seconds")
 ```
 
 # Any questions? I would appreciate any constructive criticism. Thank you!
